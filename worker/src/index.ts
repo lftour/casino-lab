@@ -1,30 +1,33 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import jwt from '@tsndr/cloudflare-worker-jwt';
 
 const app = new Hono();
 app.use('*', cors());
 
-// Firebase Token Verify Middleware
+// Firebase Token যাচাই করার নতুন মিডলওয়্যার (REST API ব্যবহার করে)
 const verifyAuth = async (c: any, next: any) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   const idToken = authHeader.split(' ')[1];
+  const apiKey = c.env.FIREBASE_API_KEY;
   try {
     const response = await fetch(
-      'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      }
     );
-    const certs: any = await response.json();
-    const decoded: any = jwt.decode(idToken);
-    const header: any = jwt.decode(idToken, { complete: true })?.header;
-    const kid = header?.kid;
-    if (!kid || !certs[kid]) throw new Error('Invalid key');
-    const verified = await jwt.verify(idToken, certs[kid], { algorithm: 'RS256' });
-    if (!verified) throw new Error('Token verification failed');
-    c.set('uid', decoded.payload.sub);
-    c.set('email', decoded.payload.email || '');
+    const data: any = await response.json();
+    if (data.error || !data.users || data.users.length === 0) {
+      return c.json({ error: 'Invalid token' }, 401);
+    }
+    const user = data.users[0];
+    c.set('uid', user.localId);          // Firebase UID
+    c.set('email', user.email || '');
   } catch (e) {
     return c.json({ error: 'Invalid token' }, 401);
   }
@@ -46,7 +49,5 @@ app.get('/api/user/me', verifyAuth, async (c) => {
   }
   return c.json(user);
 });
-
-// (পরবর্তী ফেইজে গেম API যুক্ত হবে)
 
 export default app;
