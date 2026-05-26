@@ -1,0 +1,16 @@
+{
+  "name": "casino-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@tsndr/cloudflare-worker-jwt": "^1.4.2"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
