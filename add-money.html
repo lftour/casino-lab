@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Money</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="add-money.html">Add Money</a>
+      <a href="#" onclick="auth.signOut();window.location.href='login.html'">Logout</a>
+    </nav>
+    <h2>Add Money (Deposit Request)</h2>
+    <div id="message"></div>
+    <form id="depositForm">
+      <label>Amount:</label><br>
+      <input type="number" id="amount" min="1" required><br><br>
+      <label>Payment Method:</label><br>
+      <select id="method_id" required></select><br><br>
+      <label>Your Sender Number (optional):</label><br>
+      <input type="text" id="sender_number"><br><br>
+      <label>Transaction ID (optional):</label><br>
+      <input type="text" id="transaction_id"><br><br>
+      <button type="submit">Submit Request</button>
+    </form>
+    <h3>Your Deposit History</h3>
+    <table id="historyTable">
+      <thead><tr><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    (async () => {
+      await requireAuth();
+      const methods = await apiFetch('/payment-methods');
+      const select = document.getElementById('method_id');
+      methods.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.text = `${m.name} - ${m.account_number}`;
+        select.appendChild(opt);
+      });
+      loadHistory();
+    })();
+
+    document.getElementById('depositForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const amount = +document.getElementById('amount').value;
+      const method_id = +document.getElementById('method_id').value;
+      const sender_number = document.getElementById('sender_number').value;
+      const transaction_id = document.getElementById('transaction_id').value;
+      const msg = document.getElementById('message');
+      try {
+        await apiFetch('/user/deposits', {
+          method: 'POST',
+          body: JSON.stringify({ method_id, amount, sender_number, transaction_id })
+        });
+        msg.innerHTML = '<p style="color:green">Request submitted. Waiting for admin approval.</p>';
+        document.getElementById('depositForm').reset();
+        loadHistory();
+      } catch (err) {
+        msg.innerHTML = `<p style="color:red">${err.message}</p>`;
+      }
+    });
+
+    async function loadHistory() {
+      try {
+        const deposits = await apiFetch('/user/deposits');
+        const tbody = document.querySelector('#historyTable tbody');
+        tbody.innerHTML = deposits.map(d => `
+          <tr>
+            <td>${d.amount}</td>
+            <td>${d.method_name}</td>
+            <td>${d.status}</td>
+            <td>${d.created_at}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
