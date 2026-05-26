@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
+.container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+nav { margin-bottom: 20px; }
+nav a { margin-right: 10px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
+button { padding: 8px 12px; cursor: pointer; }
