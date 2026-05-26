@@ -1,0 +1,8 @@
+name = "casino-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "casino-db"
+database_id = ""  # GitHub Actions workflow-এ পূরণ হবে
