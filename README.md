@@ -1,1 +1,1 @@
-# casino-lab
+# https://lftour.github.io/casino-lab/
