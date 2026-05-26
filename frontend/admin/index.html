@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="payment-methods.html">Payment Methods</a>
+      <a href="pending-deposits.html">Pending Deposits</a>
+      <a href="users.html">Users</a>
+      <a href="#" onclick="auth.signOut();window.location.href='../login.html'">Logout</a>
+    </nav>
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, admin. Select a section above.</p>
+  </div>
+  <script>
+    requireAuth().then(async (user) => {
+      const profile = await apiFetch('/user/me');
+      if (profile.role !== 'admin') {
+        alert('Access denied');
+        window.location.href = '../dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
