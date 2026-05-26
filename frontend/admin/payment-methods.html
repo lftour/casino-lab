@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Payment Methods</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav><a href="index.html">« Admin</a></nav>
+    <h2>Payment Methods</h2>
+    <table id="methodsTable">
+      <thead><tr><th>Name</th><th>Account</th><th>Holder</th><th>Active</th><th>Action</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <hr>
+    <h3>Add New Method</h3>
+    <form id="addForm">
+      <input type="text" id="name" placeholder="Bkash/Rocket" required>
+      <input type="text" id="account_number" placeholder="01XXXXXXXXX" required>
+      <input type="text" id="holder_name" placeholder="Holder Name">
+      <button type="submit">Add</button>
+    </form>
+  </div>
+  <script>
+    requireAuth();
+    loadMethods();
+
+    document.getElementById('addForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const account_number = document.getElementById('account_number').value;
+      const holder_name = document.getElementById('holder_name').value;
+      await apiFetch('/admin/payment-methods', {
+        method: 'POST',
+        body: JSON.stringify({ name, account_number, holder_name })
+      });
+      loadMethods();
+      e.target.reset();
+    });
+
+    async function loadMethods() {
+      const methods = await apiFetch('/admin/payment-methods');
+      const tbody = document.querySelector('#methodsTable tbody');
+      tbody.innerHTML = methods.map(m => `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.account_number}</td>
+          <td>${m.holder_name}</td>
+          <td>${m.is_active ? 'Yes' : 'No'}</td>
+          <td>
+            <button onclick="toggleActive(${m.id}, ${m.is_active ? 0 : 1})">Toggle Active</button>
+            <button onclick="deleteMethod(${m.id})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.toggleActive = async (id, is_active) => {
+      await apiFetch('/admin/payment-methods/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active })
+      });
+      loadMethods();
+    };
+    window.deleteMethod = async (id) => {
+      if (confirm('Delete this method?')) {
+        await apiFetch('/admin/payment-methods/' + id, { method: 'DELETE' });
+        loadMethods();
+      }
+    };
+  </script>
+</body>
+</html>
