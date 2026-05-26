@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pending Deposits</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav><a href="index.html">« Admin</a></nav>
+    <h2>Pending Deposit Requests</h2>
+    <table id="depositsTable">
+      <thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Sender</th><th>Txn ID</th><th>Action</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    requireAuth();
+    loadPending();
+
+    async function loadPending() {
+      const deposits = await apiFetch('/admin/pending-deposits');
+      const tbody = document.querySelector('#depositsTable tbody');
+      tbody.innerHTML = deposits.map(d => `
+        <tr>
+          <td>${d.username}</td>
+          <td>${d.amount}</td>
+          <td>${d.method_name} (${d.account_number})</td>
+          <td>${d.sender_number || '-'}</td>
+          <td>${d.transaction_id || '-'}</td>
+          <td>
+            <button onclick="approve(${d.id})">Approve</button>
+            <button onclick="reject(${d.id})">Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.approve = async (id) => {
+      await apiFetch('/admin/deposits/' + id + '/approve', { method: 'POST' });
+      loadPending();
+    };
+    window.reject = async (id) => {
+      await apiFetch('/admin/deposits/' + id + '/reject', { method: 'POST' });
+      loadPending();
+    };
+  </script>
+</body>
+</html>
