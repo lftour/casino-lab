@@ -22,18 +22,18 @@
   </div>
   <script>
     (async () => {
-      await requireAuth();
-      try {
-        const user = await apiFetch('/user/me');
-        document.getElementById('profile').innerHTML = `
-          <p><strong>Username:</strong> ${user.username}</p>
-          <p><strong>Balance:</strong> ${user.balance} points</p>
-          <p><strong>Role:</strong> ${user.role}</p>
-        `;
-      } catch (e) {
-        document.getElementById('profile').innerHTML = `<p style="color:red">Error loading profile</p>`;
-      }
-    })();
+  await requireAuth();
+  try {
+    const user = await apiFetch('/user/me');
+    document.getElementById('profile').innerHTML = `
+      <p><strong>Username:</strong> ${user.username}</p>
+      <p><strong>Balance:</strong> ${user.balance} points</p>
+      <p><strong>Role:</strong> ${user.role}</p>
+    `;
+  } catch (e) {
+    document.getElementById('profile').innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
+  }
+})();
   </script>
 </body>
 </html>
