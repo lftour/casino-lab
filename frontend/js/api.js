@@ -1,4 +1,4 @@
-const API_BASE = __WORKER_URL__ + '/api';
+const API_BASE = 'https://casino-worker.mt15abir2.workers.dev/api';
 
 async function apiFetch(endpoint, options = {}) {
   const user = auth.currentUser;
