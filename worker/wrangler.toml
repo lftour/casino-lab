@@ -5,4 +5,4 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "casino-db"
-database_id = ""  # GitHub Actions workflow-এ পূরণ হবে
+database_id = "31ffd44f-5658-4ea8-be68-13b8742b8a08"  # GitHub Actions workflow-এ পূরণ হবে
